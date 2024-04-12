@@ -105,7 +105,7 @@ module.exports = {
             res.status(201).send("Transação criada com sucesso")
 
         } catch (err) {
-            return res.status(404).json({ error: err })
+            return res.status(500).json({ error: err })
         }
 
     },
@@ -139,6 +139,34 @@ module.exports = {
         } catch (err) {
             return res.status(500).json({ error: err });
 
+        }
+    },
+
+
+    getBalance: async (req, res) => {
+        try {
+            let paidPayables = await Payable.sum('amount', {
+                where: {
+                    status: 'paid'
+                }
+            })
+
+            let waitingFundsPayables = await Payable.sum('amount', {
+                where: {
+                    status: 'waiting_funds'
+                }
+            })
+
+            let avaliableBalance = paidPayables
+            let waintingFundsBalance = waitingFundsPayables
+
+            res.status(200).json({
+                avaliable_balance: avaliableBalance,
+                waiting_funds_balance: waintingFundsBalance
+            })
+
+        } catch (err) {
+            res.status(500).json({ error: err })
         }
     }
 }
