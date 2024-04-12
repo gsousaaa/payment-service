@@ -1,5 +1,6 @@
 const Payable = require("../models/Payable");
 const Transaction = require("../models/Transaction")
+const { addDays } = require('date-fns');
 
 
 // Função para verificar se o numero do cartão é válido e está no formato correto usando o algoritmo de luhn
@@ -78,13 +79,26 @@ module.exports = {
             let newTransaction = await Transaction.create(transactionObj)
 
             if(newTransaction.payment_method === 'debit_card') {
-                let fee = 0.95
+                let fee = 0.97
+
                     await Payable.create({
                         status: 'paid',
                         amount: (newTransaction.amount * fee),
                         payment_date: newTransaction.created_transaction,
                         transaction_id: newTransaction.id
                     })
+            }
+
+            if(newTransaction.payment_method === 'credit_card') {
+                let fee = 0.95
+                let paymentDate = addDays(newTransaction.created_transaction, 30)
+                
+                await Payable.create({
+                    status: 'waiting_funds',
+                    amount: (newTransaction.amount * fee),
+                    payment_date: paymentDate,
+                    transaction_id: newTransaction.id
+                })
             }
 
 
