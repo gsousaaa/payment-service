@@ -47,7 +47,7 @@ const Transaction = sequelize.define('Transaction', {
 })
 
 // Definindo a relação entre as tabelas
-Transaction.hasMany(Payable, { foreignKey: 'transaction_id' });
+Transaction.hasMany(Payable, { foreignKey: 'transaction_id', allowNull: false});
 
 sequelize.sync()
     .then(() => {

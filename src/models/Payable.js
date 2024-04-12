@@ -14,6 +14,14 @@ const Payable = sequelize.define('Payable', {
     amount: {
         type: DataTypes.FLOAT,
         allowNull: false
+    }, 
+    payment_date: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    transaction_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false // Chave estrangeira agora é NOT NULL
     }
 }, {
     tableName: 'payables',
