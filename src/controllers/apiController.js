@@ -5,26 +5,25 @@ const Transaction = require("../models/Transaction")
 const isValidCardNumber = (num) => {
     num = num.replace(/\s/g, '')
     const arr = num
-      .split('')
-      .reverse()
-      .map(x => Number.parseInt(x));
+        .split('')
+        .reverse()
+        .map(x => Number.parseInt(x));
     const lastDigit = arr.shift();
     let sum = arr.reduce(
-      (acc, val, i) =>
-        i % 2 !== 0 ? acc + val : acc + ((val *= 2) > 9 ? val - 9 : val),
-      0
+        (acc, val, i) =>
+            i % 2 !== 0 ? acc + val : acc + ((val *= 2) > 9 ? val - 9 : val),
+        0
     );
     sum += lastDigit;
     return sum % 10 === 0;
-  };
-  
+};
+
 
 //Função para extrair os ultimos 4 digitos  de um numero de cartão
 const card4Digits = (card_number) => {
     let cardNumber = card_number.replace(/\s/g, '')
-    console.log("Número do cartão sem espaços:", cardNumber);
-    console.log(cardNumber.length)
-    if (!(isValidCardNumber(cardNumber)) || cardNumber.length < 4) {
+
+    if (!(isValidCardNumber(cardNumber)) || cardNumber.length < 4 || cardNumber.length !== 16) {
         console.error('Número de cartão inválido')
         return;
     }
@@ -34,9 +33,6 @@ const card4Digits = (card_number) => {
     return last4Digits;
 }
 
-let numeroCartao = '4485 2757 4230 8327'
-let ultimos = card4Digits(numeroCartao)
-console.log(ultimos)
 
 module.exports = {
     createTransaction: async (req, res) => {
@@ -49,6 +45,33 @@ module.exports = {
                 card_name, card_expiration_date,
                 card_cvv
             } = req.body
+
+        try {
+            if (!amount || !description || !payment_method || !card_name || !card_expiration_date || !card_cvv) {
+                return res.status(404).json({ error: 'Preencha todos os campos' })
+            }
+
+            let last4Digits
+            if (isValidCardNumber(card_number)) {
+                last4Digits = card4Digits(card_number)
+            }
+
+            let transactionObj = {
+                amount, 
+                description,
+                payment_method,
+                card_number: last4Digits,
+                card_name,
+                card_expiration_date,
+                card_cvv
+            }
+
+            await Transaction.create(transactionObj)
+            res.status(201).send("Transação criada com sucesso")
+
+        } catch (error) {
+            return res.status(404).json({ error })
+        }
 
     },
 }
