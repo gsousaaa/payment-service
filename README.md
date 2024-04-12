@@ -11,6 +11,26 @@ O projeto possui duas entidades principais:
 1. **Transaction**: Representa as informações da compra, incluindo dados do cartão, valor e descrição da transação.
 2. **Payable**: Representa os recebíveis que serão pagos ao cliente. Cada transação gera um ou mais recebíveis, dependendo do método de pagamento utilizado.
 
+### Regras de Negócio
+
+- O serviço armazena e retorna apenas os últimos 4 dígitos do número do cartão, devido à sensibilidade dessa informação.
+- Os recebíveis (payables) são criados com base nas seguintes regras:
+  - Transações com cartão de débito:
+    - O recebível é criado com status 'paid', indicando que o cliente já recebeu o valor.
+    - A data de pagamento é definida como a data da criação da transação (D+0).
+    - É aplicada uma taxa de processamento de 3% sobre o valor da transação.
+  - Transações com cartão de crédito:
+    - O recebível é criado com status 'waiting_funds', indicando que o cliente receberá o valor no futuro.
+    - A data de pagamento é definida como a data da criação da transação + 30 dias (D+30).
+    - É aplicada uma taxa de processamento de 5% sobre o valor da transação.
+- O saldo disponível (available_balance) é calculado somando todos os recebíveis com status 'paid'.
+- O saldo a receber (waiting_funds_balance) é calculado somando todos os recebíveis com status 'waiting_funds'.
+
+### Relacionamento entre Tabelas
+
+- A tabela `Transaction` tem uma relação de um para muitos com a tabela `Payable`, onde uma transação pode gerar um ou mais recebíveis.
+- A chave estrangeira `transaction_id` na tabela `Payable` estabelece essa relação.
+
 ### Funcionalidades
 
 #### 1. Processamento de Transações
@@ -114,22 +134,4 @@ O projeto possui duas entidades principais:
     }
     ```
 
-### Regras de Negócio
 
-- O serviço armazena e retorna apenas os últimos 4 dígitos do número do cartão, devido à sensibilidade dessa informação.
-- Os recebíveis (payables) são criados com base nas seguintes regras:
-  - Transações com cartão de débito:
-    - O recebível é criado com status 'paid', indicando que o cliente já recebeu o valor.
-    - A data de pagamento é definida como a data da criação da transação (D+0).
-    - É aplicada uma taxa de processamento de 3% sobre o valor da transação.
-  - Transações com cartão de crédito:
-    - O recebível é criado com status 'waiting_funds', indicando que o cliente receberá o valor no futuro.
-    - A data de pagamento é definida como a data da criação da transação + 30 dias (D+30).
-    - É aplicada uma taxa de processamento de 5% sobre o valor da transação.
-- O saldo disponível (available_balance) é calculado somando todos os recebíveis com status 'paid'.
-- O saldo a receber (waiting_funds_balance) é calculado somando todos os recebíveis com status 'waiting_funds'.
-
-### Relacionamento entre Tabelas
-
-- A tabela `Transaction` tem uma relação de um para muitos com a tabela `Payable`, onde uma transação pode gerar um ou mais recebíveis.
-- A chave estrangeira `transaction_id` na tabela `Payable` estabelece essa relação.
