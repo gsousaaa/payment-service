@@ -110,7 +110,7 @@ module.exports = {
 
     },
 
-    getTransactions: async(req, res) => {
+    getTransactions: async (req, res) => {
         let transactions = await Transaction.findAll()
         if (!transactions) {
             return res.status(404).json({ error: 'Nenhuma transação foi encontrada' })
@@ -121,7 +121,26 @@ module.exports = {
     },
 
 
-    
+    getPayables: async (req, res) => {
+        try {
+            let payables = await Payable.findAll({
+                include: [{
+                    model: Transaction,
+                    attributes: ['description']
+                }]
+            });
+
+            if (!payables) {
+                return res.status(404).json({ error: 'Nenhuma informação foi encontrada' })
+            }
+
+            return res.status(200).json(payables)
+
+        } catch (err) {
+            return res.status(500).json({ error: err });
+
+        }
+    }
 }
 
 
