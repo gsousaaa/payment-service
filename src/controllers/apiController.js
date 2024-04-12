@@ -44,30 +44,30 @@ module.exports = {
                 description,
                 payment_method,
                 card_number,
-                card_name, 
+                card_name,
                 card_expiration_date,
                 card_cvv
             } = req.body
 
-            let last4Digits
+        let last4Digits
 
         try {
             if (!amount || !description || !payment_method || !card_number || !card_name || !card_expiration_date || !card_cvv) {
                 return res.status(404).json({ error: 'Preencha todos os campos' })
             }
 
-            if(card_cvv.toString().length > 3) {
-                return res.status(404).json({error: 'CVV inválido'})
+            if (card_cvv.toString().length > 3) {
+                return res.status(404).json({ error: 'CVV inválido' })
             }
 
             if (isValidCardNumber(card_number) || card_number.length > 4 || card_number.length === 16) {
                 last4Digits = card4Digits(card_number)
             } else {
-                return res.status(404).json({error: 'Numero de cartão inválido'})
+                return res.status(404).json({ error: 'Numero de cartão inválido' })
             }
 
             let transactionObj = {
-                amount, 
+                amount,
                 description,
                 payment_method,
                 card_number: last4Digits,
@@ -78,21 +78,21 @@ module.exports = {
 
             let newTransaction = await Transaction.create(transactionObj)
 
-            if(newTransaction.payment_method === 'debit_card') {
+            if (newTransaction.payment_method === 'debit_card') {
                 let fee = 0.97
 
-                    await Payable.create({
-                        status: 'paid',
-                        amount: (newTransaction.amount * fee),
-                        payment_date: newTransaction.created_transaction,
-                        transaction_id: newTransaction.id
-                    })
+                await Payable.create({
+                    status: 'paid',
+                    amount: (newTransaction.amount * fee),
+                    payment_date: newTransaction.created_transaction,
+                    transaction_id: newTransaction.id
+                })
             }
 
-            if(newTransaction.payment_method === 'credit_card') {
+            if (newTransaction.payment_method === 'credit_card') {
                 let fee = 0.95
                 let paymentDate = addDays(newTransaction.created_transaction, 30)
-                
+
                 await Payable.create({
                     status: 'waiting_funds',
                     amount: (newTransaction.amount * fee),
@@ -104,11 +104,24 @@ module.exports = {
 
             res.status(201).send("Transação criada com sucesso")
 
-        } catch (error) {
-            return res.status(404).json({ error })
+        } catch (err) {
+            return res.status(404).json({ error: err })
         }
 
     },
+
+    getTransactions: async(req, res) => {
+        let transactions = await Transaction.findAll()
+        if (!transactions) {
+            return res.status(404).json({ error: 'Nenhuma transação foi encontrada' })
+        }
+
+
+        res.status(200).json(transactions)
+    },
+
+
+    
 }
 
 
