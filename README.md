@@ -4,12 +4,14 @@
 
 O projeto consiste em desenvolver um serviço back-end para processamento de transações de pagamento e gerenciamento de recebíveis para clientes de um serviço de processamento de pagamentos. O serviço será desenvolvido em Node.js, utilizando o framework Express para a construção de APIs RESTful. O banco de dados utilizado será o MySQL, e a interação com o banco será feita por meio do ORM Sequelize. Além disso, estão previstas implementações futuras de testes automatizados.
 
-### Entidades
+### Entidades e relacionamentos
 
 O projeto possui duas entidades principais:
-
 1. **Transaction**: Representa as informações da compra, incluindo dados do cartão, valor e descrição da transação.
 2. **Payable**: Representa os recebíveis que serão pagos ao cliente. Cada transação gera um ou mais recebíveis, dependendo do método de pagamento utilizado.
+
+- A tabela `transactions` tem uma relação de um para muitos com a tabela `payables`, onde uma transação pode gerar um ou mais recebíveis.
+- A chave estrangeira `transaction_id` na tabela `payables` estabelece essa relação.
 
 ### Regras de Negócio
 
@@ -25,11 +27,6 @@ O projeto possui duas entidades principais:
     - É aplicada uma taxa de processamento de 5% sobre o valor da transação.
 - O saldo disponível (available_balance) é calculado somando todos os recebíveis com status 'paid'.
 - O saldo a receber (waiting_funds_balance) é calculado somando todos os recebíveis com status 'waiting_funds'.
-
-### Relacionamento entre Tabelas
-
-- A tabela `Transaction` tem uma relação de um para muitos com a tabela `Payable`, onde uma transação pode gerar um ou mais recebíveis.
-- A chave estrangeira `transaction_id` na tabela `Payable` estabelece essa relação.
 
 ### Funcionalidades
 
