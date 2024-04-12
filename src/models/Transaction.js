@@ -33,7 +33,7 @@ const Transaction = sequelize.define('Transaction', {
         allowNull: false
     },
     card_cvv: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     created_transaction: {
