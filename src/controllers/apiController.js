@@ -20,16 +20,14 @@ const isValidCardNumber = (num) => {
     return sum % 10 === 0;
 };
 
+function isValidExpirationDate(expirationDate) {
+    const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    return regex.test(expirationDate)
+}
 
 //Função para extrair os ultimos 4 digitos  de um numero de cartão
 const card4Digits = (card_number) => {
     let cardNumber = card_number.replace(/\s/g, '')
-
-    if (!(isValidCardNumber(cardNumber)) || cardNumber.length < 4 || cardNumber.length !== 16) {
-        console.error('Número de cartão inválido')
-        return;
-    }
-
     let last4Digits = cardNumber.slice(-4)
 
     return last4Digits;
@@ -60,10 +58,14 @@ module.exports = {
                 return res.status(404).json({ error: 'CVV inválido' })
             }
 
-            if (isValidCardNumber(card_number) || card_number.length > 4 || card_number.length === 16) {
+            if (isValidCardNumber(card_number) && card_number.length > 4 && card_number.length === 16) {
                 last4Digits = card4Digits(card_number)
             } else {
                 return res.status(404).json({ error: 'Numero de cartão inválido' })
+            }
+
+            if(!isValidExpirationDate(card_expiration_date)) {
+                return res.status(404).json({error: 'Data de expiração inválida'})
             }
 
             let transactionObj = {
