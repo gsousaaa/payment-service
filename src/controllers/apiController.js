@@ -104,7 +104,7 @@ module.exports = {
             }
 
 
-            res.status(201).send("Transação criada com sucesso")
+            res.status(201).json({message: "Transação criada com sucesso"})
 
         } catch (err) {
             return res.status(500).json({ error: err })
